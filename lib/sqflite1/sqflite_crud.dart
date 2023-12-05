@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'dboperation.dart';
 
 void main() {
@@ -17,7 +18,8 @@ class _SqfliteCrudState extends State<SqfliteCrud> {
   final phone_controller = TextEditingController();
 
   var isloading = true; // intially ui is in loading state
-  List<Map<String, dynamic>> contacts = []; // empty list for storing data from db
+  List<Map<String, dynamic>> contacts =
+  []; // empty list for storing data from db
 
   @override
   void initState() {
@@ -44,7 +46,8 @@ class _SqfliteCrudState extends State<SqfliteCrud> {
       //here null means create contact id is null
       FloatingActionButton(
           onPressed: () => showSheet(null), child: const Icon(Icons.add)),
-      body: isloading ? const Center(
+      body: isloading
+          ? const Center(
         child: Text("NO Data"),
       )
           : ListView.builder(
@@ -61,7 +64,11 @@ class _SqfliteCrudState extends State<SqfliteCrud> {
                           showSheet(contacts[index]['id']);
                         },
                         icon: Icon(Icons.edit)),
-                    IconButton(onPressed: () {}, icon: Icon(Icons.delete)),
+                    IconButton(
+                        onPressed: () {
+                          deleteContact(contacts[index]['id']);
+                        },
+                        icon: Icon(Icons.delete)),
                   ],
                 ),
               ),
@@ -74,9 +81,10 @@ class _SqfliteCrudState extends State<SqfliteCrud> {
     if (id != null) {
       //element['id']  = id from database
       //firstWhere - first element from contacts that satisfy this condition - element['id'] == id
-      final data_from_that_id = contacts.firstWhere((element) => element['id'] == id );
+      final data_from_that_id =
+      contacts.firstWhere((element) => element['id'] == id);
       name_controller.text = data_from_that_id['name'];
-      phone_controller.text= data_from_that_id['phone'];
+      phone_controller.text = data_from_that_id['phone'];
     }
     showModalBottomSheet(
         elevation: 5,
@@ -112,17 +120,30 @@ class _SqfliteCrudState extends State<SqfliteCrud> {
                       name_controller.text = "";
                       phone_controller.text = "";
                     },
-                    child: Text(id == null ? "Create Contact" : "Update Contact"))
+                    child:
+                    Text(id == null ? "Create Contact" : "Update Contact"))
               ],
             ),
           );
-        });}
+        });
+  }
+
   Future<void> createContact() async {
     await SQLHelper.create_contact(name_controller.text, phone_controller.text);
     loadData(); // to refresh ui whenever we add a new contact
   }
-  Future<void> updateContact(int? id) async{
-    await SQLHelper.updateContact(id,name_controller.text,phone_controller.text);
+
+  Future<void> updateContact(int? id) async {
+    await SQLHelper.updateContact(
+        id, name_controller.text, phone_controller.text);
     loadData();
+  }
+
+  void deleteContact(int? id) async {
+    await SQLHelper.deleteData(id);
+    loadData(); // refresh ui
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content:
+    Text("Successfully Deleted")));
   }
 }
